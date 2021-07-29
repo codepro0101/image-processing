@@ -1,0 +1,219 @@
+import cv2 as cv
+import glob
+
+mod1 = cv.imread('modele/1.png')
+mod2 = cv.imread('modele/2.png')
+mod3 = cv.imread('modele/3.png')
+
+choix = input("choisir le modele :")
+
+if choix == "1":
+#------------------------------------------------------traitement du modele 1--------------------------------------------------------------
+    mod1_gray = cv.cvtColor(mod1, cv.COLOR_BGR2GRAY)
+    mod1_blur = cv.GaussianBlur(mod1_gray, (3, 3), 2)
+    mod1_canny = cv.Canny(mod1_blur, 10, 40)
+    _, contour, _ = cv.findContours(mod1_canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
+    with open('features.txt', 'a', encoding='utf-8') as f:
+        f.write('----------------------------------------------le modèle------------------------------------------------'+ '\n')
+        f.write(' ' + '\n')
+        f.write('les caractéristiques qui correspondent respectivement au rectangle, cercle droit, cercle gauche ' + '\n')
+        f.write(' ' + '\n')
+    area_mod1 = []
+    somxy_mod1 = []
+    for cnt in contour:
+        cv.drawContours(mod1,contour,-1, (255,0,255),2)
+        area = cv.contourArea(cnt)
+        area_mod1.append(area)
+        peri = cv.arcLength(cnt,True)
+        approx = cv.approxPolyDP(cnt, 0.02*peri, True)
+        x,y,w,h = cv.boundingRect(approx)
+        cv.rectangle(mod1_gray, (x,y), (x+w, y+h), (0,255,0), 2)
+        a_mod1 = x+y
+        somxy_mod1.append(a_mod1)
+        with open('features.txt', 'a', encoding='utf-8') as f:
+            f.write('the position is : (x,y)=('+str(x)+','+str(y)+')  et  (x+w,y+h)=('+str(x+w)+','+str(y+h)+')  et  area = '+str(area)+' perimeter = '+str(peri) + '\n')
+            f.write(' '+'\n')
+    mod1r = cv.resize(mod1, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+    cv.imshow('Model 1', mod1r)
+    cv.waitKey(0)
+
+#-----------------------------------------------traitement des images dans image1---------------------------------------------------------
+    with open('features.txt', 'a', encoding='utf-8') as f:
+        f.write('----------------------------------------------Les images1------------------------------------------------' + '\n')
+        f.write(' ' + '\n')
+
+    for img in glob.glob("image1/*.png"):
+        n = cv.imread(img)
+        nr = cv.resize(n, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+        img_gray = cv.cvtColor(n, cv.COLOR_BGR2GRAY)
+        img_blur = cv.GaussianBlur(img_gray, (3, 3), 2)
+        img_canny = cv.Canny(img_blur, 10, 40)
+        nr2 = cv.resize(n, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+
+        #cv.imshow(f'current image', nr)
+        #cv.waitKey(0)
+        _1, contour1, _1 = cv.findContours(img_canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+        area_img_lst = []
+        somxy_img = []
+        for cnt1 in contour1:
+            cv.drawContours(nr, contour1, -1, (255, 0, 255), 2)
+            area_img = cv.contourArea(cnt1)
+            area_img_lst.append(area_img)
+            peri_img = cv.arcLength(cnt1, True)
+            approx_img = cv.approxPolyDP(cnt1, 0.02 * peri, True)
+            x_img, y_img, w_img, h_img = cv.boundingRect(approx_img)
+            cv.rectangle(nr, (x_img, y_img), (x_img + w_img, y_img + h_img), (0, 255, 0), 2)
+            bimg1 = x_img + y_img
+            somxy_img.append(bimg1)
+            with open('features.txt', 'a', encoding='utf-8') as f:
+                f.write('the position is : (x,y)=('+str(x_img)+','+str(y_img)+')  et  (x+w,y+h)=('+str(x_img+w_img)+','+str(y_img+h_img)+')  et  area = '+str(area_img)+' perimeter = '+str(peri_img) + '\n')
+                f.write(' '+'\n')
+
+        with open('features.txt', 'a', encoding='utf-8') as f:
+            f.write('--------------------------------------------------------------------------------------------------' + '\n')
+
+        cv.imshow('Current image contour', nr2)
+        cv.waitKey(0)
+        if len(contour) == len(contour1) and somxy_mod1 == somxy_img:
+            print("pièce conforme")
+        else:
+            print("pièce non conforme")
+#-----------------------------------------------------------------traitement du modele 2-----------------------------------------------------------------------------
+if choix == "2":
+
+    mod2_gray = cv.cvtColor(mod2, cv.COLOR_BGR2GRAY)
+    mod2_blur = cv.GaussianBlur(mod2_gray, (3, 3), 2)
+    mod2_canny = cv.Canny(mod2_blur, 10, 40)
+    _m2, contourm2, _m2 = cv.findContours(mod2_canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+    with open('features.txt', 'a', encoding='utf-8') as f:
+        f.write('----------------------------------------------le modèle------------------------------------------------'+ '\n')
+        f.write(' ' + '\n')
+        f.write('les caractéristiques qui correspondent respectivement au rectangle droit en bas, rectangle gauche en bas, cercle, rectangle gauche en haut, rectangle droit en haut ' + '\n')
+        f.write(' ' + '\n')
+    area_mod2 = []
+    somxy_mod2 = []
+    for cnt in contourm2:
+        cv.drawContours(mod2,contourm2,-1, (255,0,255),2)
+        aream2 = cv.contourArea(cnt)
+        area_mod2.append(aream2)
+        perim2 = cv.arcLength(cnt,True)
+        approx = cv.approxPolyDP(cnt, 0.02*perim2, True)
+        x,y,w,h = cv.boundingRect(approx)
+        cv.rectangle(mod2_gray, (x,y), (x+w, y+h), (0,255,0), 2)
+        a_mod2 = x+y
+        somxy_mod2.append(a_mod2)
+        with open('features.txt', 'a', encoding='utf-8') as f:
+            f.write('the position is : (x,y)=(' + str(x) + ',' + str(y) + ')  et  (x+w,y+h)=(' + str(x + w) + ',' + str(y + h) + ')  et  area = ' + str(aream2) + ' perimeter = ' + str(perim2) + '\n')
+            f.write(' ' + '\n')
+    mod2r = cv.resize(mod2, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+    cv.imshow('Model 2', mod2r)
+    cv.waitKey(0)
+#-----------------------------------------------traitement des images dans image2---------------------------------------------------------
+    with open('features.txt', 'a', encoding='utf-8') as f:
+        f.write('----------------------------------------------Les images 2------------------------------------------------' + '\n')
+        f.write(' ' + '\n')
+    for img in glob.glob("image2/*.png"):
+        n = cv.imread(img)
+        nr = cv.resize(n, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+        img_gray = cv.cvtColor(n, cv.COLOR_BGR2GRAY)
+        img_blur = cv.GaussianBlur(img_gray, (3, 3), 2)
+        img_canny = cv.Canny(img_blur, 10, 40)
+        nr2 = cv.resize(n, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+        _2, contour2, _2 = cv.findContours(img_canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+        area_img_lst = []
+        somxy_img = []
+        for cnt1 in contour2:
+            cv.drawContours(nr, contour2, -1, (255, 0, 255), 2)
+            area_img = cv.contourArea(cnt1)
+            area_img_lst.append(area_img)
+            peri_img = cv.arcLength(cnt1, True)
+            approx_img = cv.approxPolyDP(cnt1, 0.02 * peri_img, True)
+            x_img, y_img, w_img, h_img = cv.boundingRect(approx_img)
+            cv.rectangle(nr, (x_img, y_img), (x_img + w_img, y_img + h_img), (0, 255, 0), 2)
+            bimg1 = x_img + y_img
+            somxy_img.append(bimg1)
+            with open('features.txt', 'a', encoding='utf-8') as f:
+                f.write('the position is : (x,y)=('+str(x_img)+','+str(y_img)+')  et  (x+w,y+h)=('+str(x_img+w_img)+','+str(y_img+h_img)+')  et  area = '+str(area_img)+' perimeter = '+str(peri_img) + '\n')
+                f.write(' '+'\n')
+        with open('features.txt', 'a', encoding='utf-8') as f:
+            f.write('--------------------------------------------------------------------------------------------------'+ '\n')
+
+        cv.imshow('Current image contour', nr2)
+        cv.waitKey(0)
+        if len(contour2) == len(contourm2) and somxy_mod2 == somxy_img:
+            print("pièce conforme")
+        else:
+            print("pièce non conforme")
+
+#-----------------------------------------------------------------traitement du modele 3-----------------------------------------------------------------------------
+if choix == "3":
+
+    mod3_gray = cv.cvtColor(mod3, cv.COLOR_BGR2GRAY)
+    mod3_blur = cv.GaussianBlur(mod3_gray, (3, 3), 2)
+    mod3_canny = cv.Canny(mod3_blur, 10, 40)
+    _m3, contourm3, _m3 = cv.findContours(mod3_canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+    with open('features.txt', 'a', encoding='utf-8') as f:
+        f.write('----------------------------------------------le modèle------------------------------------------------'+ '\n')
+        f.write(' ' + '\n')
+        f.write('les caractéristiques qui correspondent respectivement au rectangle droit en bas, rectangle gauche en bas, cercle, rectangle gauche en haut, rectangle droit en haut ' + '\n')
+        f.write(' ' + '\n')
+    area_mod3 = []
+    somxy_mod3 = []
+    for cnt in contourm3:
+        cv.drawContours(mod3,contourm3,-1, (255,0,255),2)
+        aream3 = cv.contourArea(cnt)
+        area_mod3.append(aream3)
+        perim3 = cv.arcLength(cnt,True)
+        approx = cv.approxPolyDP(cnt, 0.02*perim3, True)
+        x,y,w,h = cv.boundingRect(approx)
+        cv.rectangle(mod3_gray, (x,y), (x+w, y+h), (0,255,0), 2)
+        a_mod3 = x+y
+        somxy_mod3.append(a_mod3)
+        with open('features.txt', 'a', encoding='utf-8') as f:
+            f.write('the position is : (x,y)=(' + str(x) + ',' + str(y) + ')  et  (x+w,y+h)=(' + str(x + w) + ',' + str(y + h) + ')  et  area = ' + str(aream3) + ' perimeter = ' + str(perim3) + '\n')
+            f.write(' ' + '\n')
+    mod3r = cv.resize(mod3, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+    cv.imshow('Model 3', mod3r)
+    cv.waitKey(0)
+#-----------------------------------------------traitement des images dans image2---------------------------------------------------------
+    with open('features.txt', 'a', encoding='utf-8') as f:
+        f.write('----------------------------------------------Les images 3------------------------------------------------' + '\n')
+        f.write(' ' + '\n')
+    for img in glob.glob("image3/*.png"):
+        n = cv.imread(img)
+        nr = cv.resize(n, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+        img_gray = cv.cvtColor(n, cv.COLOR_BGR2GRAY)
+        img_blur = cv.GaussianBlur(img_gray, (3, 3), 2)
+        img_canny = cv.Canny(img_blur, 10, 40)
+        nr3 = cv.resize(n, None, fx=0.4, fy=0.4, interpolation=cv.INTER_CUBIC)
+        _3, contour3, _3 = cv.findContours(img_canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+        area_img_lst = []
+        somxy_img = []
+        for cnt1 in contour3:
+            cv.drawContours(nr, contour3, -1, (255, 0, 255), 2)
+            area_img = cv.contourArea(cnt1)
+            area_img_lst.append(area_img)
+            peri_img = cv.arcLength(cnt1, True)
+            approx_img = cv.approxPolyDP(cnt1, 0.02 * peri_img, True)
+            x_img, y_img, w_img, h_img = cv.boundingRect(approx_img)
+            cv.rectangle(nr, (x_img, y_img), (x_img + w_img, y_img + h_img), (0, 255, 0), 2)
+            bimg1 = x_img + y_img
+            somxy_img.append(bimg1)
+            with open('features.txt', 'a', encoding='utf-8') as f:
+                f.write('the position is : (x,y)=('+str(x_img)+','+str(y_img)+')  et  (x+w,y+h)=('+str(x_img+w_img)+','+str(y_img+h_img)+')  et  area = '+str(area_img)+' perimeter = '+str(peri_img) + '\n')
+                f.write(' '+'\n')
+        with open('features.txt', 'a', encoding='utf-8') as f:
+            f.write('--------------------------------------------------------------------------------------------------'+ '\n')
+
+        cv.imshow('Current image contour', nr3)
+        cv.waitKey(0)
+        if len(contour3) == len(contourm3) and somxy_mod3 == somxy_img:
+            print("pièce conforme")
+        else:
+            print("pièce non conforme")
+
+
+
+
+
